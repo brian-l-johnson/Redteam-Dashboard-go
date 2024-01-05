@@ -1,12 +1,33 @@
-basePath: /api/v1
+definitions:
+  models.LoginReq:
+    properties:
+      password:
+        type: string
+      user:
+        type: string
+    type: object
+  models.RegisterReq:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /example/helloworld:
-    get:
+  /auth/login:
+    post:
       consumes:
       - application/json
-      description: do ping
+      description: Login a user
+      parameters:
+      - description: Login Data
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginReq'
       produces:
       - application/json
       responses:
@@ -14,7 +35,57 @@ paths:
           description: OK
           schema:
             type: string
-      summary: ping example
+      summary: Login
       tags:
-      - example
+      - user
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a user
+      parameters:
+      - description: Login Data
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Register User
+      tags:
+      - user
+  /auth/status:
+    get:
+      consumes:
+      - application/json
+      description: Check login status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Auth Status
+      tags:
+      - user
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Health check
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Health Check
+      tags:
+      - status
 swagger: "2.0"
