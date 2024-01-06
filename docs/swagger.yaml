@@ -13,6 +13,15 @@ definitions:
       password:
         type: string
     type: object
+  models.UserReq:
+    properties:
+      active:
+        type: boolean
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
 info:
   contact: {}
 paths:
@@ -36,6 +45,20 @@ paths:
           schema:
             type: string
       summary: Login
+      tags:
+      - user
+  /auth/logout:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+      summary: Logout
       tags:
       - user
   /auth/register:
@@ -71,6 +94,69 @@ paths:
           schema:
             type: string
       summary: Auth Status
+      tags:
+      - user
+  /auth/user/{uid}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: delete user
+      tags:
+      - user
+  /auth/users:
+    get:
+      consumes:
+      - application/json
+      description: List users on the sytem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+      summary: List users
+      tags:
+      - user
+  /auth/users/{uid}:
+    put:
+      consumes:
+      - application/json
+      description: update users attributes
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserReq'
+      - description: User ID
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: update user
       tags:
       - user
   /health:

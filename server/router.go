@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/controllers"
 	docs "github.com/brian-l-johnson/Redteam-Dashboard-go/v2/docs"
+	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/middleware"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
@@ -23,10 +24,13 @@ func NewRouter() *gin.Engine {
 	router.GET("/health", health.Status)
 
 	auth := new(controllers.AuthController)
-
 	router.POST("/auth/login", auth.Login)
 	router.GET("/auth/status", auth.Status)
 	router.POST("/auth/register", auth.Register)
+	router.GET("/auth/logout", auth.Logout)
+	router.GET("/auth/users", middleware.Authorize("admin"), auth.ListUsers)
+	router.PUT("/auth/users/:uid", middleware.Authorize("admin"), auth.UpdateUser)
+	router.DELETE("/auth/user/:uid", middleware.Authorize("admin"), auth.DeleteUser)
 
 	docs.SwaggerInfo.BasePath = "/"
 

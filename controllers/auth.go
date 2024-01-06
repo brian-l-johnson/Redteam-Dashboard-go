@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/db"
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
@@ -16,9 +17,6 @@ import (
 
 type AuthController struct{}
 
-var lr = new(models.LoginReq)
-var rr = new(models.RegisterReq)
-
 // Login godoc
 //
 //	@Summary		Login
@@ -30,18 +28,145 @@ var rr = new(models.RegisterReq)
 //	@Success		200		{string}	result
 //	@Router			/auth/login [post]
 func (a AuthController) Login(c *gin.Context) {
-
+	var lr = new(models.LoginReq)
 	if err := c.BindJSON(&lr); err != nil {
 		return
 	}
-	if lr.Password != "abc123" {
-		c.IndentedJSON(http.StatusOK, gin.H{"message": "login failure"})
+
+	db := db.GetDB()
+
+	var user models.User
+	result := db.First(&user, "name=?", lr.User)
+
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusOK, gin.H{"status": "login failed", "message": result.Error})
 		return
 	}
+
+	if user.CheckPassword(lr.Password) && user.Active {
+		session := sessions.Default(c)
+		session.Set("user", lr.User)
+		session.Set("roles", strings.Join(user.Roles, ","))
+		session.Save()
+		c.IndentedJSON(http.StatusOK, gin.H{"message": "login success"})
+	} else {
+		c.IndentedJSON(http.StatusOK, gin.H{"message": "login failed"})
+	}
+}
+
+// logout godoc
+//
+// @Summary	Logout
+// @Desription	Logout user
+// @Tags	user
+// @Accept	json
+// @Produce json
+// @Success	200	json result
+// @Router	/auth/logout	[get]
+func (a AuthController) Logout(c *gin.Context) {
 	session := sessions.Default(c)
-	session.Set("user", lr.User)
+	session.Clear()
 	session.Save()
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "login success"})
+	c.IndentedJSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// users godoc
+//
+// @Summary List users
+// @Description List users on the sytem
+// @Tags	user
+// @Accept json
+// @Produce 	json
+// @Success 200 json result
+// @Router /auth/users [get]
+func (a AuthController) ListUsers(c *gin.Context) {
+	db := db.GetDB()
+	var users []models.User
+	db.Find(&users)
+
+	c.IndentedJSON(http.StatusOK, users)
+
+}
+
+// delete user godoc
+//
+// @Summary delete user
+// @Description delete a user
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param uid path string true "User ID"
+// @Success 200 {string} response
+// @Router /auth/user/{uid} [delete]
+func (a AuthController) DeleteUser(c *gin.Context) {
+	db := db.GetDB()
+	var user models.User
+	result := db.First(&user, "UID=?", c.Param("uid"))
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "user not found"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "db error"})
+			return
+		}
+	} else {
+		if user.Name != "admin" {
+			result := db.Delete(&user)
+			if result.Error != nil {
+				c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": result.Error})
+				return
+			} else {
+				c.IndentedJSON(http.StatusOK, gin.H{"status": "success", "message": "user deleted"})
+				return
+			}
+		} else {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"status": "error", "message": "refusing to delete admin user"})
+			return
+		}
+
+	}
+}
+
+// update user godoc
+//
+// @Summary update user
+// @Description update users attributes
+// @Tags	user
+// @Accept	json
+// @Produce	json
+// @Param	user	body		models.UserReq	true	"User Data"
+// @Param	uid	path	string	true	"User ID"
+// @Success 200 {string} response
+// @Router /auth/users/{uid} [put]
+func (a AuthController) UpdateUser(c *gin.Context) {
+	db := db.GetDB()
+	var user models.User
+	result := db.First(&user, "UID=?", c.Param("uid"))
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "user not found"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "db error"})
+			return
+		}
+	} else {
+		var userPost models.UserReq
+		if err := c.BindJSON(&userPost); err != nil {
+			return
+		}
+		user.Active = userPost.Active
+		user.Roles = userPost.Roles
+		result := db.Save(&user)
+		if result.Error != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": result.Error})
+			return
+		} else {
+			c.IndentedJSON(http.StatusOK, gin.H{"status": "success"})
+		}
+	}
+
 }
 
 // status godoc
@@ -55,13 +180,14 @@ func (a AuthController) Login(c *gin.Context) {
 //	@Router			/auth/status [get]
 func (a AuthController) Status(c *gin.Context) {
 	session := sessions.Default(c)
-	user := session.Get("user")
+	username := session.Get("user")
+	roles := session.Get("roles")
 
-	if user == nil {
+	if username == nil {
 		c.IndentedJSON(http.StatusOK, gin.H{"message": "not logged in"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "logged in", "user": user})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "logged in", "user": username, "roles": roles})
 }
 
 // register godoc
@@ -99,14 +225,14 @@ func (a AuthController) Register(c *gin.Context) {
 	}
 
 	fmt.Println("checked if user exists")
-	user.Name = regreq.Name
+	newUser := models.MakeUser(regreq.Name)
 	bytes, hasherr := bcrypt.GenerateFromPassword([]byte(regreq.Password), 14)
 	if hasherr != nil {
 		panic("error hashing password")
 	}
-	user.PasswordHash = string(bytes)
-	user.Active = false
-	result = db.Create(&user)
+	newUser.PasswordHash = string(bytes)
+	newUser.Active = false
+	result = db.Create(&newUser)
 	if result.Error != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "error": result.Error})
 		return
