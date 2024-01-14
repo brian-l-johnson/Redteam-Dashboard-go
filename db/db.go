@@ -21,6 +21,8 @@ func Init() {
 		panic("faled to open database file")
 	}
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Host{})
+	db.AutoMigrate(&models.Port{})
 
 	var user models.User
 	result := db.First(&user, "name=?", "admin")

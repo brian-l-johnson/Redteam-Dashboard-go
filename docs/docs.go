@@ -243,9 +243,63 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/scan/nmap": {
+            "post": {
+                "description": "upload new nmap scan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scan"
+                ],
+                "summary": "nmap scan",
+                "parameters": [
+                    {
+                        "description": "nmap scan data",
+                        "name": "scan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Scan"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.Host": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "ports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Port"
+                    }
+                }
+            }
+        },
         "models.LoginReq": {
             "type": "object",
             "properties": {
@@ -257,6 +311,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Port": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "service": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "models.RegisterReq": {
             "type": "object",
             "properties": {
@@ -264,6 +335,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Scan": {
+            "type": "object",
+            "properties": {
+                "endTime": {
+                    "type": "string"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Host"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

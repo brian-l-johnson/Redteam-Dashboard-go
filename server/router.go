@@ -32,6 +32,9 @@ func NewRouter() *gin.Engine {
 	router.PUT("/auth/users/:uid", middleware.Authorize("admin"), auth.UpdateUser)
 	router.DELETE("/auth/user/:uid", middleware.Authorize("admin"), auth.DeleteUser)
 
+	nmap := new(controllers.NmapController)
+	router.POST("/scan/nmap", nmap.UploadScan)
+
 	docs.SwaggerInfo.BasePath = "/"
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

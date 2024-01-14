@@ -1,4 +1,17 @@
 definitions:
+  models.Host:
+    properties:
+      hostname:
+        type: string
+      ip:
+        type: string
+      os:
+        type: string
+      ports:
+        items:
+          $ref: '#/definitions/models.Port'
+        type: array
+    type: object
   models.LoginReq:
     properties:
       password:
@@ -6,11 +19,35 @@ definitions:
       user:
         type: string
     type: object
+  models.Port:
+    properties:
+      id:
+        type: integer
+      protocol:
+        type: string
+      service:
+        type: string
+      state:
+        type: string
+    type: object
   models.RegisterReq:
     properties:
       name:
         type: string
       password:
+        type: string
+    type: object
+  models.Scan:
+    properties:
+      endTime:
+        type: string
+      hosts:
+        items:
+          $ref: '#/definitions/models.Host'
+        type: array
+      startTime:
+        type: string
+      status:
         type: string
     type: object
   models.UserReq:
@@ -174,4 +211,26 @@ paths:
       summary: Health Check
       tags:
       - status
+  /scan/nmap:
+    post:
+      consumes:
+      - application/json
+      description: upload new nmap scan
+      parameters:
+      - description: nmap scan data
+        in: body
+        name: scan
+        required: true
+        schema:
+          $ref: '#/definitions/models.Scan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: nmap scan
+      tags:
+      - scan
 swagger: "2.0"
