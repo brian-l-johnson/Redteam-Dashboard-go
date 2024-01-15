@@ -23,6 +23,7 @@ func Init() {
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Host{})
 	db.AutoMigrate(&models.Port{})
+	db.AutoMigrate(&models.Team{})
 
 	var user models.User
 	result := db.First(&user, "name=?", "admin")
@@ -38,7 +39,7 @@ func Init() {
 		}
 		adminUser.SetPassword(genpw)
 		adminUser.Active = true
-		adminUser.Roles = append(user.Roles, "admin")
+		adminUser.Roles = append(user.Roles, "admin", "viewer")
 
 		result = db.Create(&adminUser)
 		if result.Error != nil {

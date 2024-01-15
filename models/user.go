@@ -13,7 +13,7 @@ import (
 type Roles []string
 
 type User struct {
-	gorm.Model
+	gorm.Model   `json:"-"`
 	Name         string
 	PasswordHash string `json:"-"`
 	Active       bool

@@ -35,6 +35,11 @@ func NewRouter() *gin.Engine {
 	nmap := new(controllers.NmapController)
 	router.POST("/scan/nmap", nmap.UploadScan)
 
+	team := new(controllers.TeamController)
+	router.GET("/teams", middleware.Authorize("viewer"), team.GetTeams)
+	router.POST("/teams", middleware.Authorize("admin"), team.CreateTeam)
+	router.DELETE("/teams/:tid", middleware.Authorize("admin"), team.DeleteTeam)
+
 	docs.SwaggerInfo.BasePath = "/"
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
