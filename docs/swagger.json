@@ -233,6 +233,34 @@
                 }
             }
         },
+        "/jobs/{jobtype}/next": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "delete team",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job Type",
+                        "name": "jobtype",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/scan/nmap": {
             "post": {
                 "description": "upload new nmap scan",
@@ -346,11 +374,32 @@
         }
     },
     "definitions": {
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
         "models.Host": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
                 "hostname": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "ip": {
                     "type": "string"
@@ -363,6 +412,9 @@
                     "items": {
                         "$ref": "#/definitions/models.Port"
                     }
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -380,6 +432,12 @@
         "models.Port": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
                 "hostID": {
                     "type": "integer"
                 },
@@ -393,6 +451,9 @@
                     "type": "string"
                 },
                 "state": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -431,6 +492,12 @@
         "models.Team": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -438,6 +505,9 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

@@ -24,6 +24,7 @@ func Init() {
 	db.AutoMigrate(&models.Host{})
 	db.AutoMigrate(&models.Port{})
 	db.AutoMigrate(&models.Team{})
+	db.AutoMigrate(&models.Job{})
 
 	var user models.User
 	result := db.First(&user, "name=?", "admin")

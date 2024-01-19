@@ -1,8 +1,22 @@
 definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
   models.Host:
     properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
       hostname:
         type: string
+      id:
+        type: integer
       ip:
         type: string
       os:
@@ -11,6 +25,8 @@ definitions:
         items:
           $ref: '#/definitions/models.Port'
         type: array
+      updatedAt:
+        type: string
     type: object
   models.LoginReq:
     properties:
@@ -21,6 +37,10 @@ definitions:
     type: object
   models.Port:
     properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
       hostID:
         type: integer
       id:
@@ -30,6 +50,8 @@ definitions:
       service:
         type: string
       state:
+        type: string
+      updatedAt:
         type: string
     type: object
   models.RegisterReq:
@@ -54,11 +76,17 @@ definitions:
     type: object
   models.Team:
     properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: string
       iprange:
         type: string
       name:
+        type: string
+      updatedAt:
         type: string
     type: object
   models.UserReq:
@@ -222,6 +250,24 @@ paths:
       summary: Health Check
       tags:
       - status
+  /jobs/{jobtype}/next:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Job Type
+        in: path
+        name: jobtype
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: delete team
+      tags:
+      - jobs
   /scan/nmap:
     post:
       consumes:

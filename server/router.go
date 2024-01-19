@@ -40,6 +40,11 @@ func NewRouter() *gin.Engine {
 	router.POST("/teams", middleware.Authorize("admin"), team.CreateTeam)
 	router.DELETE("/teams/:tid", middleware.Authorize("admin"), team.DeleteTeam)
 
+	jobs := new(controllers.JobController)
+	router.GET("/jobs/:jobtype/next", jobs.NewJob)
+	router.GET("/jobs", jobs.GetJobs)
+	router.POST("/jobs/nmap/:jid", jobs.UploadScan)
+
 	docs.SwaggerInfo.BasePath = "/"
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
