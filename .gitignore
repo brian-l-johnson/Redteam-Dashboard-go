@@ -25,3 +25,6 @@ dashboard.db
 
 #tmp directory
 tmp/
+
+# env file
+.env

@@ -1,14 +1,20 @@
 package main
 
 import (
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/db"
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/jobmanager"
+	"log"
+
+	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/server"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	db.Init()
-	jobmanager.Init()
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Failed to log .env")
+	}
+
+	models.Init()
 	server.Init()
 
 }

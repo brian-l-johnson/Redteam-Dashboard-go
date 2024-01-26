@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/db"
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -33,7 +32,7 @@ func (a AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	db := db.GetDB()
+	db := models.GetDB()
 
 	var user models.User
 	result := db.First(&user, "name=?", lr.User)
@@ -80,7 +79,7 @@ func (a AuthController) Logout(c *gin.Context) {
 // @Success 200 json result
 // @Router /auth/users [get]
 func (a AuthController) ListUsers(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var users []models.User
 	db.Find(&users)
 
@@ -99,7 +98,7 @@ func (a AuthController) ListUsers(c *gin.Context) {
 // @Success 200 {string} response
 // @Router /auth/user/{uid} [delete]
 func (a AuthController) DeleteUser(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var user models.User
 	result := db.First(&user, "UID=?", c.Param("uid"))
 	if result.Error != nil {
@@ -140,7 +139,7 @@ func (a AuthController) DeleteUser(c *gin.Context) {
 // @Success 200 {string} response
 // @Router /auth/users/{uid} [put]
 func (a AuthController) UpdateUser(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var user models.User
 	result := db.First(&user, "UID=?", c.Param("uid"))
 	if result.Error != nil {
@@ -202,9 +201,13 @@ func (a AuthController) Status(c *gin.Context) {
 // @Router		/auth/register [post]
 func (a AuthController) Register(c *gin.Context) {
 	regreq := new(models.RegisterReq)
-	db := db.GetDB()
+	db := models.GetDB()
 
 	if err := c.BindJSON(&regreq); err != nil {
+		return
+	}
+	if regreq.Name == "" || regreq.Password == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"status": "error", "message": "bad response"})
 		return
 	}
 	var user models.User
@@ -214,13 +217,13 @@ func (a AuthController) Register(c *gin.Context) {
 		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			fmt.Println(("some other errer"))
 			fmt.Println(result.Error)
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"state": "error", "message": "db error"})
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "db error"})
 			return
 		}
 	}
 	if result.RowsAffected != 0 {
 		fmt.Println("user already exits")
-		c.IndentedJSON(http.StatusOK, gin.H{"state": "error", "message": "user already exists"})
+		c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "user already exists"})
 		return
 	}
 
@@ -237,5 +240,5 @@ func (a AuthController) Register(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "error": result.Error})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "user created"})
+	c.IndentedJSON(http.StatusOK, gin.H{"status": "success", "message": "user created"})
 }

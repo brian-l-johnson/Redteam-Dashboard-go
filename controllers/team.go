@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/db"
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -22,7 +21,7 @@ type TeamController struct{}
 // @Success	200	{string} result
 // @Router	/teams [get]
 func (t TeamController) GetTeams(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var teams []models.Team
 
 	result := db.Find(&teams)
@@ -51,7 +50,7 @@ func (t TeamController) CreateTeam(c *gin.Context) {
 	}
 
 	teamdb := new(models.Team)
-	db := db.GetDB()
+	db := models.GetDB()
 	result := db.First(&teamdb, "name=?", teamreq.Name)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -83,7 +82,7 @@ func (t TeamController) CreateTeam(c *gin.Context) {
 // @Success	200	{string} result
 // @Router /teams/{tid} [delete]
 func (t TeamController) DeleteTeam(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var team models.Team
 	result := db.First(&team, "ID=?", c.Param("tid"))
 	if result.Error != nil {

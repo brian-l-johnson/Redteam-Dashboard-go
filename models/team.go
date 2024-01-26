@@ -10,6 +10,7 @@ type Team struct {
 	Name       string
 	IPRange    string
 	TID        string
+	Hosts      []Host
 }
 
 func MakeTeam(name string, iprange string) Team {

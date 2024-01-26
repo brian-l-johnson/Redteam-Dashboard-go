@@ -1,0 +1,64 @@
+{{ template "head.html" . }}
+{{ template "menu.html" . }}
+    <div class="container-fluid">
+        user:  {{ .user }}<br>
+        roles: {{ .roles }}<br>
+        base url: {{ getAPIBaseURL }}<br>
+        <div x-data="createTeamDataRetriever()" x-init="getTeams()" class="d-flex flex-row">
+            <template x-for="team in teams" :key="team.TID">
+                <div class="p-2" x-data="{ team: team}">
+                    <span x-text="team.Name"></span><br/>
+                    <span x-text="team.IPRange"></span><br/>
+                    <div x-data="{ hosts: team.Hosts}">
+                        <ul>
+                            <template x-for="host in hosts" :key="host.IP">
+                                <li>
+                                    <span x-text="host.IP"></span>
+                                    <div x-data="{ports: host.Ports}">
+                                        <ul>
+                                            <template x-for="port in ports" :key="port.ID">
+                                                <li>
+                                                    <span x-text="port.Number"></span>/<span x-text="port.Protocol"></span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </li>
+
+
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <script>
+            function createTeamDataRetriever() {
+                return {
+                    isLoading: false,
+                    teams: [],
+                    getTeams() {
+                        setInterval(() => {
+                            this.isLoading = true;
+                            fetch("{{getAPIBaseURL}}/hosts/by-team")
+                            .then((response) => {
+                                    if (response.status === 401) {
+                                        document.location = "{{getAPIBaseURL}}/login.html"
+                                    } else {
+                                        return response.json()
+                                    }
+                                })
+                                .then((data) => {
+                                    this.teams = data;
+                                    this.isLoading = false;
+                                });
+                            }, 5000)
+                    }
+                }
+            }
+        </script>
+
+    </div>
+
+{{ template "footer.html" . }}

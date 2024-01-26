@@ -26,6 +26,7 @@ func MakeUser(name string) User {
 	user.Name = name
 	user.Active = false
 	user.UID = uuid.New().String()
+	user.Roles = append(user.Roles, "viewer")
 
 	return user
 }

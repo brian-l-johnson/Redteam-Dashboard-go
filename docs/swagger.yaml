@@ -25,6 +25,8 @@ definitions:
         items:
           $ref: '#/definitions/models.Port'
         type: array
+      teamID:
+        type: string
       updatedAt:
         type: string
     type: object
@@ -44,6 +46,8 @@ definitions:
       hostID:
         type: integer
       id:
+        type: integer
+      number:
         type: integer
       protocol:
         type: string
@@ -80,11 +84,17 @@ definitions:
         type: string
       deletedAt:
         $ref: '#/definitions/gorm.DeletedAt'
+      hosts:
+        items:
+          $ref: '#/definitions/models.Host'
+        type: array
       id:
-        type: string
+        type: integer
       iprange:
         type: string
       name:
+        type: string
+      tid:
         type: string
       updatedAt:
         type: string
@@ -250,6 +260,48 @@ paths:
       summary: Health Check
       tags:
       - status
+  /hosts/by-team/:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get all hosts by team
+      tags:
+      - hosts
+  /hosts/by-team/{tid}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Team ID
+        in: path
+        name: tid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get hosts by team
+      tags:
+      - hosts
+  /jobs:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get jobs
+      tags:
+      - jobs
   /jobs/{jobtype}/next:
     get:
       consumes:
@@ -268,7 +320,19 @@ paths:
       summary: delete team
       tags:
       - jobs
-  /scan/nmap:
+  /jobs/manager:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get jobmanager state
+      tags:
+      - jobs
+  /jobs/nmap/{jid}:
     post:
       consumes:
       - application/json
@@ -289,7 +353,7 @@ paths:
             type: string
       summary: nmap scan
       tags:
-      - scan
+      - jobs
   /teams:
     get:
       consumes:

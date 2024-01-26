@@ -6,14 +6,34 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/db"
-	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/jobmanager"
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type JobController struct{}
+
+// get jobmanager state godoc
+//
+// @Summary get jobmanager state
+// @Tags jobs
+// @Accept json
+// @Produces json
+// @Success 200 {string} result
+// @Router /jobs/manager [get]
+func (j JobController) GetJobManagerState(c *gin.Context) {
+	db := models.GetDB()
+	var js []models.JobStatus
+	results := db.Find(&js)
+	if results.Error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": results.Error})
+		return
+	} else {
+		c.IndentedJSON(http.StatusOK, js)
+		return
+	}
+}
 
 // get new job godoc
 //
@@ -25,19 +45,29 @@ type JobController struct{}
 // @Success	200	{string} result
 // @Router /jobs/{jobtype}/next [get]
 func (j JobController) NewJob(c *gin.Context) {
-	jm := jobmanager.GetJobManager()
-	jm.Test()
-	db := db.GetDB()
-	if !slices.Contains(jm.Types, c.Param("jobtype")) {
+	db := models.GetDB()
+
+	var js models.JobStatus
+	result := db.Find(&js, "name=?", c.Param("jobtype"))
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "unknown job type"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"status": "error", "message": result.Error})
+			return
+		}
+	} else if js.Name == "" {
 		c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "unknown job type"})
 		return
 	} else {
-		j, err := jm.GetNextJob()
+		fmt.Printf("got JobStatus: %v\n", js)
+		j, err := js.GetNextJob()
 		if err != nil {
-			db.Create(&j)
 			c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "no available teams"})
 			return
 		} else {
+			db.Create(&j)
 			c.IndentedJSON(http.StatusOK, j)
 			return
 		}
@@ -48,12 +78,13 @@ func (j JobController) NewJob(c *gin.Context) {
 // get job list godoc
 //
 // @Summary get jobs
+// @Tags jobs
 // @Accept json
 // @Produces json
 // @Success 200 {string} result
 // @Router /jobs [get]
 func (j JobController) GetJobs(c *gin.Context) {
-	db := db.GetDB()
+	db := models.GetDB()
 	var jobs []models.Job
 	result := db.Find(&jobs)
 	if result.Error != nil {
@@ -69,7 +100,7 @@ func (j JobController) GetJobs(c *gin.Context) {
 //
 //	@Summary		nmap scan
 //	@Description	upload new nmap scan
-//	@Tags			scan
+//	@Tags			jobs
 //	@Accept			json
 //	@Produce		json
 //	@Param			scan	body		models.Scan	true	"nmap scan data"
@@ -83,18 +114,21 @@ func (n JobController) UploadScan(c *gin.Context) {
 		return
 	}
 
-	db := db.GetDB()
+	db := models.GetDB()
 
 	jid := c.Param("jid")
 	var job models.Job
-	jr := db.First(&job, "jid=?", jid)
+	jr := db.First(&job, "j_id=?", jid)
 	if jr.Error != nil {
 		c.IndentedJSON(http.StatusOK, gin.H{"status": "error", "message": "job not found"})
 		return
 	}
 
+	var ipList []string
+
 	for i, host := range scan.Hosts {
 		fmt.Printf("host %v name: %v\n", i, host.Hostname)
+		ipList = append(ipList, host.IP)
 		h := new(models.Host)
 		lookupresult := db.First(&h, "IP=?", host.IP)
 		if lookupresult.Error != nil {
@@ -112,6 +146,18 @@ func (n JobController) UploadScan(c *gin.Context) {
 		} else {
 			h.Ports = host.Ports
 			db.Save(&h)
+		}
+	}
+
+	job.Status = "complete"
+	db.Save(&job)
+
+	var teamHosts []models.Host
+	db.Find(&teamHosts, "team_id=?", job.TID)
+	for _, h := range teamHosts {
+		if !slices.Contains(ipList, h.IP) {
+			db.Delete(&h)
+			fmt.Printf("deleting host with ip %v\n", h.IP)
 		}
 	}
 

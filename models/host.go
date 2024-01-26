@@ -8,5 +8,5 @@ type Host struct {
 	Hostname   string
 	OS         string
 	Ports      []Port
-	TeamID     uint
+	TeamID     string
 }

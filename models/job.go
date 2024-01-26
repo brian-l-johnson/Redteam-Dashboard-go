@@ -12,10 +12,10 @@ type Job struct {
 	IPRange    string
 	Status     string
 	Scanner    string
-	TID        uint
+	TID        string
 }
 
-func MakeJob(jobtype string, iprange string, tid uint) Job {
+func MakeJob(jobtype string, iprange string, tid string) Job {
 	var job Job
 	job.Type = jobtype
 	job.IPRange = iprange
