@@ -6,10 +6,10 @@
         base url: {{ getAPIBaseURL }}<br>
         <div x-data="createTeamDataRetriever()" x-init="getTeams()" class="d-flex flex-row">
             <template x-for="team in teams" :key="team.TID">
-                <div class="p-2" x-data="{ team: team}">
-                    <span x-text="team.Name"></span><br/>
-                    <span x-text="team.IPRange"></span><br/>
-                    <div x-data="{ hosts: team.Hosts}">
+                <div class="p-2" x-data="{ name: team.Name, ips: team.IPRange, hosts: team.Hosts}">
+                    <span x-text="name"></span><br/>
+                    <span x-text="ips"></span><br/>
+                    <div x-data="{ hosts: hosts}">
                         <ul>
                             <template x-for="host in hosts" :key="host.IP">
                                 <li>
