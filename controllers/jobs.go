@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"slices"
 
 	"github.com/brian-l-johnson/Redteam-Dashboard-go/v2/models"
 
@@ -125,7 +124,11 @@ func (n JobController) UploadScan(c *gin.Context) {
 	}
 
 	var ipList []string
-
+	var teamHosts []models.Host
+	db.Find(&teamHosts, "team_id=?", job.TID)
+	for _, h := range teamHosts {
+		db.Delete(&h)
+	}
 	for i, host := range scan.Hosts {
 		fmt.Printf("host %v name: %v\n", i, host.Hostname)
 		ipList = append(ipList, host.IP)
@@ -151,15 +154,6 @@ func (n JobController) UploadScan(c *gin.Context) {
 
 	job.Status = "complete"
 	db.Save(&job)
-
-	var teamHosts []models.Host
-	db.Find(&teamHosts, "team_id=?", job.TID)
-	for _, h := range teamHosts {
-		if !slices.Contains(ipList, h.IP) {
-			db.Delete(&h)
-			fmt.Printf("deleting host with ip %v\n", h.IP)
-		}
-	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"status": "success"})
 }
