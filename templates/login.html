@@ -23,12 +23,12 @@
                 async function doLogin(event) {
                     event.preventDefault();
                     const formData = new FormData(document.login);
-                    const responseData = await postFormDataAsJson("http://127.0.0.1:8080/auth/login", formData);
+                    const responseData = await postFormDataAsJson("{{getAPIBaseURL}}/auth/login", formData);
                     //console.log(responseData)
                     //console.log(event)
                     console.log(responseData.message)
                     if(responseData.message == "login success") {
-                        document.location = "http://127.0.0.1:8080/main.html"
+                        document.location = "{{getAPIBaseURL}}/main.html"
                     }
                     else {
                         document.getElementById("loginerr").style.display = "block"

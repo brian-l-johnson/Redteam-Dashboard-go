@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"slices"
 	"strings"
 
@@ -26,7 +27,7 @@ func AuthorizeHTML(role string) gin.HandlerFunc {
 				return
 			}
 		} else {
-			c.Redirect(http.StatusFound, "http://127.0.0.1:8080/login.html")
+			c.Redirect(http.StatusFound, os.Getenv("API_BASE_URL")+"/login.html")
 			c.Abort()
 			return
 		}
