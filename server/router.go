@@ -100,6 +100,9 @@ func NewRouter() *gin.Engine {
 		session.Save()
 		c.Redirect(http.StatusFound, "/login.html")
 	})
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/main.html")
+	})
 
 	return router
 }

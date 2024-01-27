@@ -39,21 +39,22 @@
                     isLoading: false,
                     teams: [],
                     getTeams() {
-                        setInterval(() => {
-                            this.isLoading = true;
-                            fetch("{{getAPIBaseURL}}/hosts/by-team")
-                            .then((response) => {
-                                    if (response.status === 401) {
-                                        document.location = "{{getAPIBaseURL}}/login.html"
-                                    } else {
-                                        return response.json()
-                                    }
-                                })
-                                .then((data) => {
-                                    this.teams = data;
-                                    this.isLoading = false;
-                                });
-                            }, 5000)
+                        //setInterval(
+                        
+                        this.isLoading = true;
+                        fetch("{{getAPIBaseURL}}/hosts/by-team")
+                        .then((response) => {
+                                if (response.status === 401) {
+                                    document.location = "{{getAPIBaseURL}}/login.html"
+                                } else {
+                                    return response.json()
+                                }
+                            })
+                            .then((data) => {
+                                this.teams = data;
+                                this.isLoading = false;
+                            });
+                            //}, 5000)
                     }
                 }
             }
