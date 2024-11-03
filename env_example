@@ -1,0 +1,2 @@
+#file should be named .env
+API_BASE_URL=https://base_url

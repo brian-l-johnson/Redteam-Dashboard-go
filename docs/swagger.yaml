@@ -1,61 +1,11 @@
 definitions:
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
   models.Host:
-    properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      hostname:
-        type: string
-      id:
-        type: integer
-      ip:
-        type: string
-      os:
-        type: string
-      ports:
-        items:
-          $ref: '#/definitions/models.Port'
-        type: array
-      teamID:
-        type: string
-      updatedAt:
-        type: string
     type: object
   models.LoginReq:
     properties:
       password:
         type: string
       user:
-        type: string
-    type: object
-  models.Port:
-    properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      hostID:
-        type: integer
-      id:
-        type: integer
-      number:
-        type: integer
-      protocol:
-        type: string
-      service:
-        type: string
-      state:
-        type: string
-      updatedAt:
         type: string
     type: object
   models.RegisterReq:
@@ -66,37 +16,18 @@ definitions:
         type: string
     type: object
   models.Scan:
-    properties:
-      endTime:
-        type: string
-      hosts:
-        items:
-          $ref: '#/definitions/models.Host'
-        type: array
-      startTime:
-        type: string
-      status:
-        type: string
     type: object
   models.Team:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       hosts:
         items:
           $ref: '#/definitions/models.Host'
         type: array
-      id:
-        type: integer
       iprange:
         type: string
       name:
         type: string
       tid:
-        type: string
-      updatedAt:
         type: string
     type: object
   models.UserReq:
