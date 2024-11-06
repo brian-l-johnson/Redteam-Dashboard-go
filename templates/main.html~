@@ -1,6 +1,9 @@
 {{ template "head.html" . }}
 {{ template "menu.html" . }}
     <div class="container-fluid">
+        user:  {{ .user }}<br>
+        roles: {{ .roles }}<br>
+        base url: {{ getAPIBaseURL }}<br>
         <div x-data="createTeamDataRetriever()" x-init="getTeams()" class="d-flex flex-row">
             <template x-for="team in teams" :key="team.TID">
                 <div class="p-2" x-data="{ name: team.Name, ips: team.IPRange, hosts: team.Hosts}">
